@@ -1,0 +1,12 @@
+{
+  "fonte": "https://www.planalto.gov.br/ccivil_03/leis/l9503compilado.htm",
+  "fonte_consultada": "https://anttlegis.antt.gov.br/action/ActionDatalegis.php?acao=abrirTextoAto&cod_menu=7155&cod_modulo=161&link=S&numeroAto=00009503&orgao=NI&seqAto=000&tipo=LEI&valorAno=1997",
+  "data_consulta": "2026-11-21",
+  "base_legal": "CTB, arts. 258 e 259; valores com redação da Lei 13.281/2016",
+  "naturezas": {
+    "leve": {"pontos": 3, "valor": "88.38"},
+    "media": {"pontos": 4, "valor": "130.16"},
+    "grave": {"pontos": 5, "valor": "195.23"},
+    "gravissima": {"pontos": 7, "valor": "293.47"}
+  }
+}
