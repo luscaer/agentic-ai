@@ -58,3 +58,65 @@ def calcular_valor_multas(infracoes: list) -> dict:
             "sua aplicabilidade jurídica não é validada. Não infere reincidência."
         ),
     }
+
+
+def analisar_pontuacao(infracoes: list, data_referencia: str, ear: bool) -> dict:
+    """Simula uma janela móvel de 12 meses pelas datas do cometimento."""
+    from datetime import date
+    from .schemas import EntradaAnalisePontuacao
+
+    entrada = EntradaAnalisePontuacao(
+        infracoes=infracoes, data_referencia=data_referencia, ear=ear,
+    )
+    referencia = date.fromisoformat(entrada.data_referencia)
+    if referencia < date(2022, 4, 12):
+        raise ValueError("Use data_referencia a partir de 2022-04-12: não simulamos a transição legal de 2021.")
+    try:
+        inicio = referencia.replace(year=referencia.year - 1)
+    except ValueError:
+        inicio = referencia.replace(year=referencia.year - 1, day=28)
+    consideradas = []
+    desconsideradas = []
+    total = 0
+    gravissimas = 0
+    for infracao in sorted(entrada.infracoes, key=lambda item: item.data):
+        dia = date.fromisoformat(infracao.data)
+        item = infracao.model_dump()
+        if dia > referencia:
+            motivo = "posterior_a_referencia"
+        elif dia <= inicio:
+            motivo = "fora_da_janela"
+        elif infracao.situacao != "pontuavel":
+            motivo = infracao.situacao
+        else:
+            motivo = None
+        if motivo:
+            desconsideradas.append({**item, "motivo": motivo})
+            continue
+        subtotal = TABELA["naturezas"][infracao.natureza]["pontos"] * infracao.quantidade
+        total += subtotal
+        if infracao.natureza == "gravissima":
+            gravissimas += infracao.quantidade
+        consideradas.append({**item, "subtotal_pontos": subtotal, "acumulado_na_janela": total})
+    if entrada.ear or gravissimas == 0:
+        limite = 40
+    elif gravissimas == 1:
+        limite = 30
+    else:
+        limite = 20
+    return {
+        "inicio_exclusivo": inicio.isoformat(),
+        "fim_inclusivo": referencia.isoformat(),
+        "ear": entrada.ear,
+        "consideradas": consideradas,
+        "desconsideradas": desconsideradas,
+        "total_pontos": total,
+        "quantidade_gravissimas": gravissimas,
+        "limite_pontos": limite,
+        "limite_atingido": total >= limite,
+        "pontos_ate_limite": max(0, limite - total),
+        "base_legal": "CTB, arts. 259 § 4º e 261 I e § 5º; Res. CONTRAN 723/2018, alterada pela 844/2021, arts. 3º, 6º e 7º",
+        "observacao": (
+            "Simulação na data de referência, não saldo oficial. "
+        ),
+    }

@@ -43,3 +43,39 @@ class EntradaPontos(BaseModel):
 class EntradaMultas(BaseModel):
     model_config = ConfigDict(extra="forbid")
     infracoes: list[Multa]
+
+
+class InfracaoDatada(Infracao): # herda de Infracao e acrescenta campos de data e situacao.
+    data: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$", description="Data do cometimento: AAAA-MM-DD")
+    situacao: Literal[
+        "pontuavel", "suspensao_especifica", "excecao_art_259",
+        "anulada", "advertencia",
+    ] = Field(default="pontuavel", description="Classificação declarada; não inferida pela natureza")
+
+
+class EntradaAnalisePontuacao(BaseModel): # valida todos os argumentos necessários à análise
+    model_config = ConfigDict(extra="forbid")
+    infracoes: list[InfracaoDatada]
+    data_referencia: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    ear: bool = Field(strict=True, description="Exerce atividade remunerada ao veículo")
+
+
+class Notificacao(BaseModel): # representa os dados de uma notificação de trânsito
+    model_config = ConfigDict(extra="forbid")
+    tipo: Literal["autuacao", "penalidade_multa"]
+    numero_auto: str | None = None
+    tipificacao: str | None = None
+    local: str | None = None
+    data_infracao: str | None = Field(default=None, description="AAAA-MM-DD")
+    hora_infracao: str | None = Field(default=None, description="HH:MM ou HH:MM:SS")
+    placa: str | None = None
+    marca: str | None = None
+    especie: str | None = None
+    orgao_autuador: str | None = None
+    agente_autuador: str | None = None
+    equipamento: str | None = None
+    prontuario_condutor: str | None = None
+    assinatura_infrator: bool | None = Field(default=None, strict=True)
+    data_expedicao: str | None = Field(default=None, description="AAAA-MM-DD; não é a data de recebimento")
+    data_limite_defesa: str | None = None
+    data_limite_recurso: str | None = None
