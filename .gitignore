@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Environment & Secrets
+.env
+.env.local
+
+# Local vector database & processed caches
+data/qdrant/
+data/processed/
+
+# macOS / IDEs
+.DS_Store
+.vscode/
+.idea/
+
+# Task
+.task/
