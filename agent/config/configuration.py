@@ -136,13 +136,13 @@ class Settings(BaseSettings):
     # =========================
     # RERANKER CONFIGURATION
     # =========================
-    RERANKER_MODEL: str = Field(
-        default="cross-encoder/mmarco-mMiniLMv2-L12-H384-v1",
-        description="Modelo cross-encoder opcional para refinar a ordem dos documentos",
+    RERANKER_ENABLED: bool = Field(
+        default=True,
+        description="Liga o reranker cross-encoder; se desligado ou indisponível, mantém a ordem da busca",
     )
-    RERANKER_DEVICE: str = Field(
-        default="cpu",
-        description="Dispositivo de processamento para o reranker (cpu, cuda, mps)",
+    RERANKER_MODEL: str = Field(
+        default="BAAI/bge-reranker-v2-m3-int8",
+        description="Cross-encoder multilíngue suportado pelo fastembed (ONNX, ~570 MB, baixado no 1º uso)",
     )
     RERANKER_TOP_K: int = Field(
         default=5,

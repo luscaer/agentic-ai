@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from langgraph.checkpoint.memory import MemorySaver
+from loguru import logger
 from qdrant_client import AsyncQdrantClient
 
 from agent.adapters.guardrails.default_guardrail_adapter import DefaultGuardrailAdapter
@@ -24,7 +25,10 @@ from agent.adapters.memory.in_memory_memory_adapter import (
     SimpleSummarizerAdapter,
 )
 from agent.adapters.orchestrator.langgraph_adapter import LangGraphOrchestratorAdapter
-from agent.adapters.retrieval.cross_encoder_reranker_adapter import NullRerankerAdapter
+from agent.adapters.retrieval.cross_encoder_reranker_adapter import (
+    CrossEncoderRerankerAdapter,
+    NullRerankerAdapter,
+)
 from agent.adapters.skills.filesystem_skill_adapter import FileSystemSkillAdapter
 from agent.adapters.splitters.legal_splitter_adapter import LegalArticleSplitterAdapter
 from agent.adapters.vectorstores.qdrant_adapter import QdrantVectorStoreAdapter
@@ -50,6 +54,25 @@ def create_qdrant_client() -> AsyncQdrantClient:
     qdrant_path = Path(settings.QDRANT_PATH)
     qdrant_path.mkdir(parents=True, exist_ok=True)
     return AsyncQdrantClient(path=str(qdrant_path))
+
+
+def build_reranker() -> RerankerPort:
+    """Reranker cross-encoder via fastembed; cai para o nulo (com aviso) se desligado ou falhar."""
+    if not settings.RERANKER_ENABLED:
+        logger.info("Reranker desligado por configuração (RERANKER_ENABLED=false).")
+        return NullRerankerAdapter()
+    try:
+        from fastembed.rerank.cross_encoder import TextCrossEncoder
+
+        modelo = TextCrossEncoder(model_name=settings.RERANKER_MODEL)
+    except Exception as exc:
+        logger.warning(
+            "Reranker '{}' indisponível ({!r}); seguindo SEM reranqueamento.",
+            settings.RERANKER_MODEL,
+            exc,
+        )
+        return NullRerankerAdapter()
+    return CrossEncoderRerankerAdapter(model=modelo)
 
 
 def build_mcp_adapter() -> FastMCPAdapter:
@@ -118,7 +141,7 @@ async def get_real_langgraph_orchestrator(
     return build_langgraph_orchestrator(
         llm=llm,
         vector_store=vector_store,
-        reranker=NullRerankerAdapter(),
+        reranker=build_reranker(),
         memory=memory,
         summarizer=summarizer,
         skill_port=FileSystemSkillAdapter(settings.SKILLS_DIR),
