@@ -56,9 +56,7 @@ class RoteadorAgenteNode:
         catalogo_skills = self._skill_port.formatar_catalogo_para_prompt()
         ferramentas_mcp = await self._mcp_port.listar_ferramentas()
         ferramentas_str = (
-            "\n".join(
-                f"- `{f.nome}` ({f.servidor}): {f.descricao}" for f in ferramentas_mcp
-            )
+            "\n".join(f.formatar_para_prompt() for f in ferramentas_mcp)
             if ferramentas_mcp
             else "Nenhuma ferramenta MCP conectada."
         )

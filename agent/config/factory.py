@@ -17,6 +17,7 @@ from agent.adapters.llm.langchain_chat_adapter import LangChainChatAdapter
 from agent.adapters.llm.langchain_summarizer_adapter import LangChainSummarizerAdapter
 from agent.adapters.llm.llm_factory import LangChainLLMFactory
 from agent.adapters.loaders.pdf_loader_adapter import PDFLoaderAdapter
+from agent.adapters.mcp.fastmcp_adapter import FastMCPAdapter
 from agent.adapters.mcp.null_mcp_adapter import NullMCPAdapter
 from agent.adapters.memory.in_memory_memory_adapter import (
     InMemoryConversationMemoryAdapter,
@@ -49,6 +50,18 @@ def create_qdrant_client() -> AsyncQdrantClient:
     qdrant_path = Path(settings.QDRANT_PATH)
     qdrant_path.mkdir(parents=True, exist_ok=True)
     return AsyncQdrantClient(path=str(qdrant_path))
+
+
+def build_mcp_adapter() -> FastMCPAdapter:
+    """Adapter MCP real: servidor próprio CTB Tools + Fetch (se `MCP_FETCH_ENABLED`)."""
+    from mcp_servers.config import servers
+
+    ativos = {
+        nome: cfg
+        for nome, cfg in servers.items()
+        if nome != "fetch" or settings.MCP_FETCH_ENABLED
+    }
+    return FastMCPAdapter(ativos)
 
 
 def build_langgraph_orchestrator(
@@ -109,7 +122,7 @@ async def get_real_langgraph_orchestrator(
         memory=memory,
         summarizer=summarizer,
         skill_port=FileSystemSkillAdapter(settings.SKILLS_DIR),
-        mcp_port=mcp_port or NullMCPAdapter(),
+        mcp_port=mcp_port or build_mcp_adapter(),
         guardrail_port=guardrail_port or DefaultGuardrailAdapter(),
         checkpointer=checkpointer if checkpointer is not None else MemorySaver(),
     )

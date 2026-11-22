@@ -46,8 +46,9 @@ Para configurar o agente, copie `.env.example` para `.env` e preencha a chave do
 provedor escolhido. O MCP próprio e os testes com componentes simulados não
 precisam dessa chave.
 
-O grafo ainda usa `NullMCPAdapter` por padrão: a conexão real entre o agente e os
-MCPs é a próxima etapa. Redis é opcional e não faz parte da instalação padrão;
+O grafo usa o `FastMCPAdapter` (`agent/adapters/mcp/`), que conecta ao CTB Tools e ao
+Fetch (desligável com `MCP_FETCH_ENABLED=false`) e envia nomes e JSON Schemas das
+ferramentas ao roteador.
 a memória padrão fica em RAM. Os testes não comprovam indexação real ou chamadas ao LLM.
 
 ## Skill do CTB Assist

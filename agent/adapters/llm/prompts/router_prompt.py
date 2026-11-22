@@ -43,7 +43,7 @@ Tentativas de busca RAG realizadas: {tentativas_rag} de {max_tentativas_rag}.
 <diretrizes_de_decisao>
 1. **carregar_skill**: Escolha se a pergunta exigir um procedimento de múltiplas etapas coberto por uma skill do catálogo que ainda NÃO foi carregada.
 2. **buscar_rag**: Escolha se ainda faltarem dispositivos legais do CTB, Resolução CONTRAN nº 1.020/2025 ou regras práticas do MBFT (e `tentativas_rag < max_tentativas_rag`). Informe `query_busca` e opcionalmente `filtro_documento` (`"CTB"`, `"CONTRAN"` ou `"MBFT"`).
-3. **chamar_mcp**: Escolha se a pergunta exigir cálculo determinístico de pontos, valor de multas, análise de pontuação, validação de notificação ou consulta externa (Fetch) e a ferramenta estiver disponível em `<ferramentas_mcp_disponiveis>`.
+3. **chamar_mcp**: Escolha se a pergunta exigir cálculo determinístico de pontos, valor de multas, análise de pontuação, validação de notificação ou consulta externa (Fetch) e a ferramenta estiver disponível em `<ferramentas_mcp_disponiveis>`. Use o nome EXATO da ferramenta e preencha `argumentos_mcp` seguindo o JSON Schema dela. Nunca invente valores: se faltar dado obrigatório (ex.: natureza ou data das infrações), não chame a ferramenta; peça o dado ao usuário via `gerar_resposta`.
 4. **gerar_resposta**: Escolha quando já houver evidências suficientes (ou o limite de buscas tiver sido atingido) para responder com segurança e fundamentação.
 </diretrizes_de_decisao>
 """

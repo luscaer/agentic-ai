@@ -5,6 +5,7 @@ Port (contrato) para descoberta e execução de ferramentas MCP
 (servidor FastMCP próprio do CTB e servidor MCP Fetch da comunidade).
 """
 
+import json
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -17,6 +18,29 @@ class FerramentaMCPInfo:
     servidor: str
     descricao: str
     parametros: dict[str, Any] = field(default_factory=dict)
+
+    def formatar_para_prompt(self) -> str:
+        """Linha do catálogo do roteador: nome, servidor, descrição e JSON Schema dos argumentos."""
+        texto = f"- `{self.nome}` ({self.servidor}): {self.descricao}"
+        if self.parametros:
+            schema = json.dumps(
+                _sem_titulos(self.parametros), ensure_ascii=False, separators=(",", ":")
+            )
+            texto += f"\n  argumentos (JSON Schema): {schema}"
+        return texto
+
+
+def _sem_titulos(schema: Any) -> Any:
+    """Remove `title` gerados automaticamente, que só gastam tokens do roteador."""
+    if isinstance(schema, dict):
+        return {
+            k: _sem_titulos(v)
+            for k, v in schema.items()
+            if not (k == "title" and isinstance(v, str))
+        }
+    if isinstance(schema, list):
+        return [_sem_titulos(i) for i in schema]
+    return schema
 
 
 @dataclass(frozen=True)
