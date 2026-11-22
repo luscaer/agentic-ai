@@ -51,13 +51,16 @@ Fetch (desligável com `MCP_FETCH_ENABLED=false`) e envia nomes e JSON Schemas d
 ferramentas ao roteador.
 a memória padrão fica em RAM. Os testes não comprovam indexação real ou chamadas ao LLM.
 
-## Skill do CTB Assist
+## Skills do CTB Assist
 
-A skill está em [skills/orientacao-ctb/SKILL.md](skills/orientacao-ctb/SKILL.md).
-Segue o formato do notebook 13: cabeçalho YAML com `name` e `description`, seguido
-das instruções para escolher ferramentas, preparar entradas e apresentar respostas.
+As skills ficam em `skills/<nome>/SKILL.md`, no formato do notebook 13: cabeçalho YAML
+com `name` e `description`, seguido das instruções em etapas.
 
-É um arquivo de orientação para o futuro agente, não uma ferramenta MCP nem código
-executável. Os clientes atuais não carregam a skill automaticamente. Na integração
-do agente, o nome e a descrição entram no catálogo, e o corpo é lido quando a skill
-é selecionada, seguindo o exemplo `load_skill` do professor.
+| Skill | Tarefa |
+|---|---|
+| [analisar-infracoes](skills/analisar-infracoes/SKILL.md) | Analisar uma infração: enquadramento no CTB, regras do MBFT, exceções, cálculos via MCP e orientação fundamentada |
+| [orientar-habilitacao](skills/orientar-habilitacao/SKILL.md) | Orientar sobre habilitação, PPD, renovação e toxicológico com o CTB e a Resolução CONTRAN 1.020/2025 |
+
+São arquivos de orientação, não ferramentas MCP nem código. O nome e a descrição de cada
+skill entram no catálogo do roteador; o corpo só é lido quando o roteador escolhe a skill,
+e passa a valer nas decisões seguintes e na resposta final.
