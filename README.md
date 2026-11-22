@@ -51,6 +51,26 @@ Fetch (desligável com `MCP_FETCH_ENABLED=false`) e envia nomes e JSON Schemas d
 ferramentas ao roteador.
 a memória padrão fica em RAM. Os testes não comprovam indexação real ou chamadas ao LLM.
 
+## Interface (Streamlit)
+
+Com o ambiente ativado e o `.env` preenchido (veja `.env.example`), inicie a interface:
+
+```bash
+streamlit run app.py
+```
+
+Ela abre em `http://localhost:8501`. O servidor MCP próprio e o Fetch são iniciados
+automaticamente pelo agente; não é preciso subir nada à parte.
+
+- **Chat:** cada pergunta vai ao agente com o `thread_id` da conversa, então ele lembra os turnos anteriores.
+- **Nova conversa:** o botão da barra lateral cria um novo `thread_id` e limpa a tela; a memória de cada conversa é isolada.
+- **Rastros:** abaixo de cada resposta aparecem as skills carregadas e as ferramentas MCP chamadas (✅/❌). No expansor "Detalhes" ficam os argumentos, os resultados ou erros e as fontes recuperadas.
+- **Avisos:** mensagens bloqueadas pelo guardrail, falta de evidência e falhas (chave de API ausente, servidor indisponível, tempo esgotado) aparecem como mensagens amigáveis, sem derrubar a interface.
+
+A interface só apresenta resultados; a lógica jurídica e os cálculos ficam no agente e nas ferramentas MCP.
+O código está em `app.py` (tela) e em `streamlit_app/` (ponte assíncrona com o agente e formatação). A conversa fica em memória:
+reiniciar o processo apaga o histórico.
+
 ## Skills do CTB Assist
 
 As skills ficam em `skills/<nome>/SKILL.md`, no formato do notebook 13: cabeçalho YAML
