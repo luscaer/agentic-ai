@@ -41,6 +41,7 @@ class FakeAgenticLLM:
     def __init__(self, forcar_reformulacao: bool = True) -> None:
         self._forcar_reformulacao = forcar_reformulacao
         self.historicos_recebidos: list[int] = []
+        self.skills_conteudo_vistos: list[str] = []
 
     async def decidir_proxima_acao(
         self,
@@ -53,8 +54,10 @@ class FakeAgenticLLM:
         resultados_mcp_resumo: str,
         tentativas_rag: int,
         max_tentativas_rag: int,
+        skills_conteudo: str = "",
     ) -> DecisaoRoteador:
         self.historicos_recebidos.append(len(historico))
+        self.skills_conteudo_vistos.append(skills_conteudo)
         lower = pergunta.lower()
 
         if "habilitação" in lower or "instrutor autônomo" in lower or "ppd" in lower:
@@ -267,3 +270,25 @@ async def test_memoria_multi_turno_isolada_por_thread_id() -> None:
         sessao_id="sessao-B",
     )
     assert "histórico=0 msgs" in r3.conteudo
+
+
+@pytest.mark.asyncio
+async def test_roteador_recebe_o_corpo_da_skill_carregada() -> None:
+    """O procedimento da skill carregada deve chegar ao roteador nos passos seguintes."""
+    llm = FakeAgenticLLM(forcar_reformulacao=False)
+    orchestrator = LangGraphOrchestratorAdapter(
+        llm=llm,
+        vector_store=FakeVectorStore(),
+        reranker=NullRerankerAdapter(),
+        skill_port=FileSystemSkillAdapter("./skills"),
+        guardrail_port=DefaultGuardrailAdapter(),
+    )
+
+    await orchestrator.executar(
+        pergunta="Passei no sinal vermelho, qual a multa?", sessao_id="thread-skill-router"
+    )
+
+    # 1º passo: skill ainda não carregada; passos seguintes: corpo completo da skill
+    assert llm.skills_conteudo_vistos[0] == ""
+    assert all("Etapa 1" in texto for texto in llm.skills_conteudo_vistos[1:])
+    assert "analisar-infracoes" in llm.skills_conteudo_vistos[-1]

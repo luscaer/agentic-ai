@@ -52,6 +52,7 @@ class LLMPort(Protocol):
         resultados_mcp_resumo: str,
         tentativas_rag: int,
         max_tentativas_rag: int,
+        skills_conteudo: str = "",
     ) -> DecisaoRoteador:
         """Decide o próximo passo do agente: buscar RAG, carregar skill, chamar MCP ou responder."""
         ...

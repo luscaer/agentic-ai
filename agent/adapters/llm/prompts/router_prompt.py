@@ -24,6 +24,10 @@ Analise a pergunta do usuário, o histórico da conversa e o que já foi coletad
 {skills_carregadas}
 </skills_ja_carregadas>
 
+<procedimentos_das_skills_carregadas>
+{skills_conteudo}
+</procedimentos_das_skills_carregadas>
+
 <ferramentas_mcp_disponiveis>
 {ferramentas_mcp}
 </ferramentas_mcp_disponiveis>
@@ -45,6 +49,7 @@ Tentativas de busca RAG realizadas: {tentativas_rag} de {max_tentativas_rag}.
 2. **buscar_rag**: Escolha se ainda faltarem dispositivos legais do CTB, Resolução CONTRAN nº 1.020/2025 ou regras práticas do MBFT (e `tentativas_rag < max_tentativas_rag`). Informe `query_busca` e opcionalmente `filtro_documento` (`"CTB"`, `"CONTRAN"` ou `"MBFT"`).
 3. **chamar_mcp**: Escolha se a pergunta exigir cálculo determinístico de pontos, valor de multas, análise de pontuação, validação de notificação ou consulta externa (Fetch) e a ferramenta estiver disponível em `<ferramentas_mcp_disponiveis>`. Use o nome EXATO da ferramenta e preencha `argumentos_mcp` seguindo o JSON Schema dela. Nunca invente valores: se faltar dado obrigatório (ex.: natureza ou data das infrações), não chame a ferramenta; peça o dado ao usuário via `gerar_resposta`.
 4. **gerar_resposta**: Escolha quando já houver evidências suficientes (ou o limite de buscas tiver sido atingido) para responder com segurança e fundamentação.
+5. **Skills carregadas**: se houver um procedimento em `<procedimentos_das_skills_carregadas>`, siga as etapas dele NA ORDEM para escolher a próxima ação, verificando no que já foi coletado qual etapa ainda falta: consultar o RAG no documento indicado, chamar a ferramenta, ou, se faltar um dado que o procedimento manda perguntar ao usuário, escolher `gerar_resposta` para pedir esse dado em vez de supor.
 </diretrizes_de_decisao>
 """
 

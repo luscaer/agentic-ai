@@ -75,6 +75,11 @@ class RoteadorAgenteNode:
             else "Nenhuma ferramenta MCP executada ainda."
         )
 
+        skills_conteudo = "\n\n".join(
+            f"### Skill `{nome}`\n{texto}"
+            for nome, texto in state.get("skills_conteudo", {}).items()
+        )
+
         decisao = await self._llm.decidir_proxima_acao(
             pergunta=consulta.pergunta_original,
             historico=consulta.historico,
@@ -85,6 +90,7 @@ class RoteadorAgenteNode:
             resultados_mcp_resumo=mcp_resumo,
             tentativas_rag=tentativas_rag,
             max_tentativas_rag=self._max_tentativas_rag,
+            skills_conteudo=skills_conteudo,
         )
 
         # Salvaguardas determinísticas sobre a decisão do LLM

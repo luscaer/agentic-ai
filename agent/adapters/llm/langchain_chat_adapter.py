@@ -118,12 +118,15 @@ class LangChainChatAdapter:
         resultados_mcp_resumo: str,
         tentativas_rag: int,
         max_tentativas_rag: int,
+        skills_conteudo: str = "",
     ) -> DecisaoRoteador:
         historico_lc = self._converter_historico(historico)
         res: SchemaDecisaoRoteador = await self._router_chain.ainvoke(
             {
                 "catalogo_skills": catalogo_skills,
                 "skills_carregadas": ", ".join(skills_carregadas) or "Nenhuma",
+                "skills_conteudo": skills_conteudo
+                or "Nenhuma skill carregada ainda.",
                 "ferramentas_mcp": ferramentas_mcp_disponiveis
                 or "Nenhuma ferramenta MCP conectada.",
                 "documentos_resumo": documentos_resumo
