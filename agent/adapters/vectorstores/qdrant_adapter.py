@@ -26,7 +26,7 @@ from agent.domain.value_objects.fonte_documento import FonteDocumento
 from agent.domain.value_objects.topico import Topico
 
 _RE_QUERY_ARTIGO = re.compile(
-    r"\b(?:art\.?|artigo)\s*(\d+(?:-[A-Z])?)\b", re.IGNORECASE
+    r"\b(?:arts?\.?|artigos?)\s*(\d+(?:-[A-Z])?)\b", re.IGNORECASE
 )
 _UUID_NAMESPACE = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
 
@@ -48,10 +48,6 @@ class QdrantVectorStoreAdapter:
     ) -> None:
         self._client = client
         self.COLLECTION_NAME = collection_name or settings.QDRANT_COLLECTION_NAME
-        self._client.set_model(self.DENSE_MODEL, vector_name=self.DENSE_VECTOR_NAME)
-        self._client.set_sparse_model(
-            self.SPARSE_MODEL, vector_name=self.SPARSE_VECTOR_NAME
-        )
 
     @classmethod
     async def criar(

@@ -97,12 +97,12 @@ class Settings(BaseSettings):
         description="Nome da collection principal no Qdrant",
     )
     QDRANT_DENSE_MODEL: str = Field(
-        default="BAAI/bge-m3",
+        default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         description="Nome do modelo de embeddings densos configurado no Qdrant/FastEmbed",
     )
     QDRANT_DENSE_SIZE: int = Field(
-        default=1024,
-        description="Dimensão dos vetores densos (bge-m3=1024, MiniLM=384)",
+        default=384,
+        description="Dimensão dos vetores densos (paraphrase-multilingual-MiniLM-L12-v2=384, multilingual-e5-large=1024)",
     )
     QDRANT_SPARSE_MODEL: str = Field(
         default="Qdrant/bm42-all-minilm-l6-v2-attentions",
