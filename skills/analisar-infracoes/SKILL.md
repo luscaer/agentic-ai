@@ -38,8 +38,13 @@ Use esta skill sempre que o usuário relatar uma conduta no trânsito, perguntar
 3. Verifique se cabe **advertência por escrito** (Art. 267 CTB: infração leve ou média sem outra infração nos últimos 12 meses).
 
 ### Etapa 5 — Cálculos Determinísticos via Ferramentas MCP
-1. **Nunca faça contas de pontuação, soma de multas ou análise de limite de pontos apenas de cabeça** quando houver ferramenta MCP disponível (`calcular_pontos`, `calcular_valor_multas`, `analisar_pontuacao`).
-2. Passe os parâmetros exatos extraídos do CTB (natureza e multiplicador explícito) para a ferramenta MCP e utilize o valor retornado na resposta.
+1. **Nunca faça contas de pontuação, soma de multas ou análise de limite de pontos de cabeça.** Use as ferramentas do servidor CTB Tools, pelo nome exato:
+   - `ctb_tools_calcular_pontos`: soma os pontos por natureza (lista `infracoes`, cada uma com `natureza` e `quantidade`);
+   - `ctb_tools_calcular_valor_multas`: soma os valores das multas (natureza, quantidade e multiplicador; multiplicador maior que 1 exige `fundamento_multiplicador`, citando o artigo confirmado na Etapa 4);
+   - `ctb_tools_analisar_pontuacao`: simula a janela de 12 meses (cada infração com `data` AAAA-MM-DD, mais `data_referencia` e `ear`, que vêm do usuário conforme a Etapa 1; nunca presuma EAR).
+2. Use na chamada a natureza e o multiplicador extraídos do CTB nas Etapas 2 e 4. Se faltar algum dado obrigatório, não chame a ferramenta: peça o dado ao usuário.
+3. Se a ferramenta devolver erro, corrija apenas o que os dados do usuário permitirem; nunca apresente um total inventado.
+4. Use na resposta o valor retornado pela ferramenta e preserve as ressalvas que ela informar (não é saldo oficial da CNH nem decisão de suspensão).
 
 ### Etapa 6 — Formatação da Orientação Fundamentada
 Estruture a resposta final de forma clara, objetiva e consultiva:
