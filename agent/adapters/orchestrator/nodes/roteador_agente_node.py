@@ -113,6 +113,19 @@ class RoteadorAgenteNode:
                 justificativa="Nenhuma ferramenta MCP conectada no momento.",
                 query_busca=consulta.pergunta_original,
             )
+        elif decisao.acao == "chamar_mcp" and any(
+            r.get("sucesso")
+            and r.get("ferramenta") == decisao.ferramenta_mcp
+            and r.get("argumentos") == decisao.argumentos_mcp
+            for r in tool_results
+        ):
+            decisao = DecisaoRoteador(
+                acao="gerar_resposta",
+                justificativa=(
+                    f"Ferramenta MCP '{decisao.ferramenta_mcp}' já foi executada com sucesso "
+                    "para os mesmos argumentos neste turno."
+                ),
+            )
 
         logger.info(
             "Roteador (passo {}) | acao='{}' | justificativa='{}'",

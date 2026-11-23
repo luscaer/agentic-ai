@@ -1,3 +1,7 @@
+
+
+
+
 """
 agent/adapters/llm/langchain_chat_adapter.py
 
@@ -9,6 +13,7 @@ para todo o ciclo agêntico do CTB Assist:
 - Geração fundamentada (`gerar_resposta`)
 """
 
+import json
 from typing import Any, Literal
 
 from langchain_core.language_models import BaseChatModel
@@ -64,9 +69,12 @@ class SchemaDecisaoRoteador(BaseModel):
         default=None,
         description="Nome da ferramenta MCP quando acao == 'chamar_mcp'.",
     )
-    argumentos_mcp: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Argumentos JSON da ferramenta MCP quando acao == 'chamar_mcp'.",
+    argumentos_mcp_json: str = Field(
+        default="{}",
+        description=(
+            "Objeto JSON serializado como string com os argumentos exatos da ferramenta MCP "
+            "conforme o schema listado (use '{}' quando acao != 'chamar_mcp')."
+        ),
     )
 
 
@@ -139,6 +147,19 @@ class LangChainChatAdapter:
                 "question": pergunta,
             }
         )
+        argumentos_mcp: dict[str, Any] = {}
+        if res.argumentos_mcp_json and res.argumentos_mcp_json.strip():
+            try:
+                parsed = json.loads(res.argumentos_mcp_json)
+                if isinstance(parsed, dict):
+                    argumentos_mcp = parsed
+            except (json.JSONDecodeError, TypeError) as exc:
+                logger.warning(
+                    "Falha ao parsear argumentos_mcp_json='{}': {}",
+                    res.argumentos_mcp_json,
+                    exc,
+                )
+
         return DecisaoRoteador(
             acao=res.acao,
             justificativa=res.justificativa,
@@ -146,7 +167,7 @@ class LangChainChatAdapter:
             query_busca=res.query_busca,
             filtro_documento=res.filtro_documento,
             ferramenta_mcp=res.ferramenta_mcp,
-            argumentos_mcp=res.argumentos_mcp,
+            argumentos_mcp=argumentos_mcp,
         )
 
     async def reescrever_query(
@@ -210,20 +231,29 @@ class LangChainChatAdapter:
             resumo.conteudo if resumo else "Nenhum resumo de conversa anterior."
         )
 
-        resultado: SchemaRespostaLLM = await self._rag_chain.ainvoke(
-            {
-                "skills_ativas": skills_ativas or "Nenhuma skill carregada neste turno.",
-                "resultados_mcp": resultados_mcp
-                or "Nenhuma ferramenta MCP executada neste turno.",
-                "context": contexto,
-                "resumo": texto_resumo,
-                "historico": historico_lc,
-                "question": pergunta,
-            }
-        )
+        payload = {
+            "skills_ativas": skills_ativas or "Nenhuma skill carregada neste turno.",
+            "resultados_mcp": resultados_mcp
+            or "Nenhuma ferramenta MCP executada neste turno.",
+            "context": contexto,
+            "resumo": texto_resumo,
+            "historico": historico_lc,
+            "question": pergunta,
+        }
+        resultado: SchemaRespostaLLM = await self._rag_chain.ainvoke(payload)
+
+        conteudo = (resultado.conteudo or "").strip()
+        if not conteudo:
+            logger.warning(
+                "SchemaRespostaLLM retornou conteudo vazio; executando fallback textual."
+            )
+            fallback_chain = PROMPT_SISTEMA | self._llm | StrOutputParser()
+            conteudo = (await fallback_chain.ainvoke(payload)).strip() or (
+                "Não foi possível formular a resposta com as evidências disponíveis."
+            )
 
         return ResultadoGeracao(
-            conteudo=resultado.conteudo,
+            conteudo=conteudo,
             faltou_informacao=resultado.faltou_informacao,
         )
 
